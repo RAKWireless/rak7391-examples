@@ -4,7 +4,7 @@ CONFIG_FILE=./config.json
 USER_ID=admin
 
 # login
-docker exec -it stack ttn-lw-cli login --callback=false
+#docker exec -it stack ttn-lw-cli login --callback=false
 
 # parse json file to add gateway
 gw_index=0
