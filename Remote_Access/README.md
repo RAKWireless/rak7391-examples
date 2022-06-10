@@ -30,23 +30,23 @@ Here are the steps；
 
 2. After you create your account, you can learn how to install it. But since we are using the containerized Tailscale, we will do it in the container way, so just skip it.
 
-   <img src="assets\create-account.png" alt="skip introduction" style="zoom:50%;" />
+   <img src="assets/create-account.png" alt="skip introduction" style="zoom:50%;" />
 
 3. Now we should go to the setting page and generate the key. There are different kinds of keys, check the [documentation](https://tailscale.com/kb/1085/auth-keys/) for information about each kind of key.
 
-   <img src="assets\settings.png" alt="go to settings" style="zoom:50%;" />
+   <img src="assets/settings.png" alt="go to settings" style="zoom:50%;" />
 
-   <img src="assets\key.png" alt="go to keys" style="zoom:50%;" />
+   <img src="assets/key.png" alt="go to keys" style="zoom:50%;" />
 
-   <img src="assets\generate-key.png" alt="generate key" style="zoom:50%;" />
+   <img src="assets/generate-key.png" alt="generate key" style="zoom:50%;" />
 
    4. Now you should be able to see the key, you need to copy the key, 
 
-      <img src="assets\copy-key.png" alt="copy the key" style="zoom:50%;" />
+      <img src="assets/copy-key.png" alt="copy the key" style="zoom:50%;" />
 
       and set it as an environment variable in the `docker-compose.yml` file:
 
-      <img src="assets\docker-compose.png" alt="paste the key to the docker-compose.yml file" style="zoom:50%;" />
+      <img src="assets/docker-compose.png" alt="paste the key to the docker-compose.yml file" style="zoom:50%;" />
 
    
 
@@ -96,11 +96,11 @@ docker-compose up
 
 you should see that your mahcine is connected in the terminal:
 
-<img src="assets\terminal.png" alt="terminal" style="zoom:50%;" />
+<img src="assets/terminal.png" alt="terminal" style="zoom:50%;" />
 
 and also connected in the console (Web interface):
 
-<img src="assets\web-connected.png" alt="web interface" style="zoom:50%;" />
+<img src="assets/web-connected.png" alt="web interface" style="zoom:50%;" />
 
 Now, the IP assigned to this machine is 100.98.64.7, you can add register another node in the same way, and try to see if you can control each machine from the other machine using SSH.
 
