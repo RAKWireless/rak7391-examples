@@ -1,6 +1,6 @@
 #!/bin/bash
 
-CONFIG_FILE=./config.json
+CONFIG_FILE=$1
 USER_ID=admin
 
 # login
