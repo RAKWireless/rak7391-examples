@@ -109,8 +109,7 @@ while true;do
                             docker exec -it stack ttn-lw-cli end-devices create $application_id $device_id \
                                 --dev-eui $dev_eui --join-eui $app_eui --frequency-plan-id $frequency_plan_id \
                                 --root-keys.app-key.key $app_key --lorawan_version MAC_V1_0_3 --lorawan_phy_version PHY_V1_0_3_REV_A \
-                                --supports-join --supports-class-b --supports-class-c
-                                #--formatters.up-formatter FORMATTER_CAYENNELPP
+                                --supports-join --supports-class-c
                         else
                             echo "Error occured when creating end device."
                         fi
