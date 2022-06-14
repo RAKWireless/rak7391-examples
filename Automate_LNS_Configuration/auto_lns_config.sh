@@ -3,6 +3,15 @@
 CONFIG_FILE=$1
 USER_ID=admin
 
+if [ $# != 1 ];then
+    echo "Usage: $0 configure.json"
+    exit 1
+fi
+if [ ! -f $1 ];then
+    echo "Configure file does not exist !"
+    exit 1
+fi
+
 # login
 #docker exec -it stack ttn-lw-cli login --callback=false
 
