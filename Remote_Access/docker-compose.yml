@@ -16,7 +16,7 @@ services:
       - net_admin
       - sys_module
     environment:
-      - TS_AUTH_KEY=tskey-k1tYBZ2CNTRL-1uFnwPvZ4H3uA6BGpHh8i
+      - TS_AUTH_KEY=tskey-kxeT6N4CNTRL-54YuAY21vsHBXBci1rnjE
     command:
       - /bin/sh
       - /launch.sh
