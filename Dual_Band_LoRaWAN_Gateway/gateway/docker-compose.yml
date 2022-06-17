@@ -1,0 +1,52 @@
+version: '2.0'
+
+services:
+
+  basicstation:
+    
+    image: xoseperez/basicstation:v2
+    container_name: basicstation
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+
+    environment:
+
+      MODEL: "RAK5146"
+      INTERFACE: "SPI"
+      GW_RESET_GPIO: 17
+      GW_POWER_EN_GPIO: 0
+      GW_POWER_EN_LOGIC: 1
+      DEVICE: "/dev/spidev0.0"
+      GATEWAY_EUI: "E45F01FFFE51B772"
+      # Using LNS protocol: define a custom LNS server
+      TC_URI: "wss://localhost:8887"
+      # Using LNS protocol: if you use a server other than TTN, you will have to provide the certificate for that server.
+      TC_TRUST: "-----BEGIN CERTIFICATE-----MIIDxDCCAqygAwIBAgIUWEN1S2RRta1QzTkwiQfInS7UiXQwDQYJKoZIhvcNAQELBQAwaDELMAkGA1UEBhMCRVMxEjAQBgNVBAgTCUNhdGFsdW55YTESMBAGA1UEBxMJQmFyY2Vsb25hMRYwFAYDVQQKEw1UVE4gQ2F0YWx1bnlhMRkwFwYDVQQDExBUVE4gQ2F0YWx1bnlhIENBMB4XDTIyMDYxNjAyMTEwMFoXDTI3MDYxNTAyMTEwMFowaDELMAkGA1UEBhMCRVMxEjAQBgNVBAgTCUNhdGFsdW55YTESMBAGA1UEBxMJQmFyY2Vsb25hMRYwFAYDVQQKEw1UVE4gQ2F0YWx1bnlhMRkwFwYDVQQDExBUVE4gQ2F0YWx1bnlhIENBMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAysYOzUnouiZM3I2ymJGgZWaPov+L1P62stpSPzIpy9s001H8Ywey3dfN/GXwUJQXZsx+FOppFYnlIG17VetnSbNc8jYFBGo2s1iXSloeOkCrxoJzLbPLWBOjSfle97X4KcWu02nzTbbWUSBG9BlyVuh5xVkF2urPGErjjTmY3g6NWDIdeJZG03sVHbcZwM1dTs9wrw9ML8n7s6vDOuK9oA5/13SyuyX34f7nDtaCwxti2LMoDYs1UfHF/jsuo0uXaddZg56psY/yTa9RWFG92KMUXys90ajSaC0sQdUKDW5rVdyaWoSIQDzLZk1a8+T1cellBSoCTG0aDNqAlYNOhwIDAQABo2YwZDAOBgNVHQ8BAf8EBAMCAQYwEgYDVR0TAQH/BAgwBgEB/wIBAjAdBgNVHQ4EFgQUN1KYTlqJsFASGtZZvnFeUYHMJaswHwYDVR0jBBgwFoAUN1KYTlqJsFASGtZZvnFeUYHMJaswDQYJKoZIhvcNAQELBQADggEBAAh2WI69v3xNClorx4zKXrqpzUSkzK4dDFyREHh4wliun0YJ/RJvk8+piPJ+PeWShNwmdULEROvDp6waNkPMhwyOyrUHlkfUBuXagtEMnVCPKdaiSLKzSHUposR47wlVJAlLiNwLVMoaM4v3mLKhZrmFwfRFqd27xi3FHQ9777WTJxPch9+c6LGqT1dwv2UaQKo8u96hHD5pV4m++QXvX/419Lpn5uWlsNm6poE/zy29CBZqj7zlR4br7dOAExscw1WLMymltGsY/FL89Qj6B2K4m5r6O4Yi2lQtxABdKrzjIANjsDR9b2hh3YGMhUDFzdzrR2dG9pK0sS/a+u7KvDw=-----END CERTIFICATE-----"
+      # Using LNS protocol: finally, you need to create a KEY for the gateway and provide it here:
+      TC_KEY: "NNSXS.D3MI7R46ZSPTYXBHADA6XM6OELYICLPIB2IL7RI.SYZNRHRWY2XOD5R4QBM3U5ZTQLQ3ZVZ3V5FHG3OS364JSEZHMPTA"
+
+  2g4-packet-forwarder:
+    image: xoseperez/2g4-packet-forwarder:latest
+    container_name: 2g4-packet-forwarder
+    restart: unless-stopped
+    devices:
+      - /dev/ttyAMAO
+
+    environment:
+
+      # If you have the concentrator connected to a different port you can define it this way
+      #DEVICE: "/dev/ttyS0"
+
+      # The default LNS server is the European TTN server.
+      # If you still want to use TTN but a different region you can set it this way:
+      #TTN_REGION: "eu1"
+
+      # Or you can set a completely different LNS server.
+      SERVER_HOST: localhost
+      SERVER_PORT: 1700
+
+      # If you want the gateway to report a specific lat/lon/alt you can set them this way:
+      #GPS_LATITUDE: 41.42
+      #GPS_LONGITUDE: 2.12
+      #GPS_ALTITUDE: 0

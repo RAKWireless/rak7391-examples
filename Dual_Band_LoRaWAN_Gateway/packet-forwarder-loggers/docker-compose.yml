@@ -1,0 +1,47 @@
+version: '3'
+
+services:
+
+  bslogger:
+    image: bslogger
+    build: 
+      context: ./
+    container_name: bslogger
+    privileged: true
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    
+    # Call the specific logger you want to use (log2***)
+    command: ["python", "-u", "log2api.py"]
+
+    environment:
+
+      # Generic
+      PROTOCOL: "basicstation"
+      CONTAINER_NAME: "basicstation"
+      GATEWAY_ID: "my-gateway"
+
+      # log2api and log2json use these to aggregate data (number of buckets and size in seconds for each bucket)
+      BUCKET_COUNT: 54
+      BUCKET_SIZE: 60
+
+      # log2idb
+      DB_HOST: "localhost"
+      DB_PORT: 8086
+      DB_USER: ""
+      DB_PASS: ""
+      DB_NAME: "gateways"
+      DB_MEASUREMENT: "metrics"
+
+      # log2mqtt
+      MQTT_HOST: "localhost"
+      MQTT_PORT: 1883
+      MQTT_USER: ""
+      MQTT_PASS: ""
+      MQTT_TOPIC: "gateway/metrics"
+      MQTT_DATA_FORMAT: "json"
+
+    # only required to expose the port for log2api
+    ports:
+      - 8888:8888

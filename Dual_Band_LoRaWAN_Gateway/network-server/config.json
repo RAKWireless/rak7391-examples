@@ -1,0 +1,23 @@
+{
+  "gateways": [
+    {
+      "gateway-id": "rak5146",
+      "frequency-plan-id": "US_902_928_FSB_2",
+      "gateway-eui": "E45F01FFFE51B772"
+    }
+  ],
+  "applications": [
+    {
+      "application-id": "app01",
+      "devices": [
+        {
+          "device-id": "rak1901",
+          "frequency-plan-id": "US_902_928_FSB_2",
+          "dev-eui": "70B3D57ED00511AC",
+          "app-eui": "0000000000000000",
+          "app-key": "EAA72BB8C812C047BF68B8896636D25E"
+        }
+      ]
+    }
+  ]
+}
