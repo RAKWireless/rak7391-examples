@@ -19,7 +19,7 @@ In this project, you need the following hardware:
 
 There are there MiniPCIe slots on the RAK7391, mount the RAK5146 Concentrator on the `MiniPCIe #1`  and mount 2.4GHz Concentrator on the `MiniPCIe #2`. The RAK7391 board has a dedicated I2C port (J14) for OLED screen, and RAK1901 can be assembled.
 
-![setup](C:\Users\xikai\Desktop\assets\setup.jpg)
+![setup](C:assets/setup.jpg)
 
 ## 3. Software Deploy 
 
