@@ -152,7 +152,7 @@ Open Grafana's web interface and then create a new dasbboard:
 
 the "measurement" will be something like "eui-xxxxxxxx", and you can **Select** either/both "temperature_1" or "relatively_humidity_2" to display. If you want to display temperature and relatively_humidity on the same panel, you can create another query. The final result should be somthing like the following graph:
 
-![image-20220622200104739](../../../AppData/Roaming/Typora/typora-user-images/image-20220622200104739.png)
+![image-20220622200104739](assets/grafana-panel.png)
 
 ## 5. License
 
