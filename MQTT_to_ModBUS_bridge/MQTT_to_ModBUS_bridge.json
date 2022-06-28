@@ -1,0 +1,444 @@
+[
+    {
+        "id": "e7ed03bfc197124f",
+        "type": "tab",
+        "label": "MQTT to ModBUS bridge",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "95d90c9e68592536",
+        "type": "modbus api request",
+        "z": "e7ed03bfc197124f",
+        "name": "",
+        "server": "6932e01c1949e185",
+        "setTopic": "0",
+        "retries": 0,
+        "x": 470,
+        "y": 520,
+        "wires": [
+            [
+                "dce64cc095d4678c"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "317ebcb85a86da52",
+        "type": "debug",
+        "z": "e7ed03bfc197124f",
+        "name": "",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 910,
+        "y": 580,
+        "wires": []
+    },
+    {
+        "id": "133266e884019bfc",
+        "type": "mqtt in",
+        "z": "e7ed03bfc197124f",
+        "name": "",
+        "topic": "bridge/#",
+        "qos": "0",
+        "datatype": "auto",
+        "broker": "d967d8113b753eee",
+        "nl": false,
+        "rap": true,
+        "rh": 0,
+        "inputs": 0,
+        "x": 100,
+        "y": 400,
+        "wires": [
+            [
+                "2f07d79bc947b233"
+            ]
+        ]
+    },
+    {
+        "id": "2f07d79bc947b233",
+        "type": "function",
+        "z": "e7ed03bfc197124f",
+        "name": "Mqtt2ModbusRequestApi",
+        "func": "var config = {\n  \"devices\": [\n    {\n        \"id\": 42, \"name\": \"LED01\",  \"type\": \"coil\", \"address\": 0, \"quantity\": 1\n    },\n    {\n        \"id\": 42, \"name\": \"sensor01\", \"type\": \"holding\", 'quantity': 2,\n        \"registries\": [\n          { 'name': 'humidity', 'address': 0, 'polling': 60 },\n          { 'name': 'temperature', 'address': 1, 'polling': 60 }\n        ]\n    }\n  ]\n}\n\nmsg._topic = msg.topic;\nmsg._payload = msg.payload;\n\nvar param = [];\nvar device;\nvar reg;\nvar command;\nvar obj = {};\nvar bexist = false;\n\nif (msg._topic == \"bridge/config/read\") { // read config\n    msg.topic = \"bridge/config\";\n    msg.payload = config;\n} else if (msg._topic == \"bridge/config/write\") { // write config\n    return;\n} else if (msg._topic.match(/^bridge\\/[a-zA-Z0-9_]+\\/(read|write)$/g) != null\n    || msg._topic.match(/^bridge\\/[a-zA-Z0-9_]+\\/[a-zA-Z0-9_]+\\/(read|write)$/g) != null) { // coil || holding or other\n    param = msg._topic.split('/');\n\n    if (param.length == 3) {\n        device = param[1];\n        command = param[2];\n        reg = null;\n    } else if (param.length == 4) {\n        device = param[1];\n        reg = param[2]\n        command = param[3];\n    } else {\n        return;\n    }\n\n    for(var i = 0; i < config.devices.length; i++) {\n        if(config.devices[i].name == device) {\n            obj.id = config.devices[i].id;\n            obj[command] = config.devices[i].type;\n            if (reg == null) {\n                obj.addr = config.devices[i].address;\n                if (command == \"read\") {\n                    obj.quantity = config.devices[i].quantity;\n                } else {\n                    obj.value = parseInt(msg._payload);\n                }\n                bexist = true;\n                break;\n            } else {\n                for (var j = 0; j < config.devices[i].registries.length; j++) {\n                    if (config.devices[i].registries[j].name == reg) {\n                        obj.addr = config.devices[i].registries[j].address;\n                        obj.quantity = 1;\n                        bexist = true;\n                        break;\n                    }\n                }\n            }\n        }\n    }\n\n    if (bexist == false) {\n        return;\n    }\n\n    msg.payload = obj;\n} else {\n    return;\n}\n\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 310,
+        "y": 400,
+        "wires": [
+            [
+                "95d90c9e68592536",
+                "0b4d36f51d00ef63"
+            ]
+        ]
+    },
+    {
+        "id": "dce64cc095d4678c",
+        "type": "function",
+        "z": "e7ed03bfc197124f",
+        "name": "ModbusRequestApi2Mqtt",
+        "func": "var config = {\n  \"devices\": [\n    {\n        \"id\": 42, \"name\": \"LED01\",  \"type\": \"coil\", \"address\": 0, \"quantity\": 1\n    },\n    {\n        \"id\": 42, \"name\": \"sensor01\", \"type\": \"holding\", 'quantity': 2,\n        \"registries\": [\n          { 'name': 'humidity', 'address': 0, 'polling': 60 },\n          { 'name': 'temperature', 'address': 1, 'polling': 60 }\n        ]\n    }\n  ]\n}\n\nmsg._topic = msg.topic;\nmsg._payload = msg.payload;\n\nvar param = msg._topic.split('/');\nvar type = \"\";\nvar method = \"\";\nif (msg._payload.read == undefined) {\n    return;\n} else {\n    type = msg._payload.read;\n    method = \"read\";\n}\n\nif(param.length == 3) {\n    msg.topic = param[0] + '/' + param[1] + '/status';\n    if (method == \"read\") {\n        msg.payload = msg._payload.result.buffer[0];\n    }\n} else if(param.length == 4) {\n    msg.topic = param[0] + '/' + param[1] +'/' + param[2] + '/status';\n    if (method == \"read\") {\n        msg.payload = msg._payload.result.data[0];\n    }\n} else {\n    return;\n}\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 710,
+        "y": 520,
+        "wires": [
+            [
+                "317ebcb85a86da52",
+                "600725af812a6075"
+            ]
+        ]
+    },
+    {
+        "id": "e5c64e17da96b882",
+        "type": "aedes broker",
+        "z": "e7ed03bfc197124f",
+        "name": "",
+        "mqtt_port": 1883,
+        "mqtt_ws_bind": "port",
+        "mqtt_ws_port": "",
+        "mqtt_ws_path": "",
+        "cert": "",
+        "key": "",
+        "certname": "",
+        "keyname": "",
+        "dburl": "",
+        "usetls": false,
+        "x": 130,
+        "y": 120,
+        "wires": [
+            [],
+            []
+        ]
+    },
+    {
+        "id": "a4b30de10db36153",
+        "type": "inject",
+        "z": "e7ed03bfc197124f",
+        "name": "get LED status every 30 seconds",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "30",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "bridge/LED01/read",
+        "payload": "",
+        "payloadType": "str",
+        "x": 460,
+        "y": 200,
+        "wires": [
+            [
+                "d9f05b0ef06e3950"
+            ]
+        ]
+    },
+    {
+        "id": "63811d87ee9463d0",
+        "type": "inject",
+        "z": "e7ed03bfc197124f",
+        "d": true,
+        "name": "LED ON",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "bridge/LED01/write",
+        "payload": "1",
+        "payloadType": "num",
+        "x": 620,
+        "y": 60,
+        "wires": [
+            [
+                "d9f05b0ef06e3950"
+            ]
+        ]
+    },
+    {
+        "id": "d9f05b0ef06e3950",
+        "type": "mqtt out",
+        "z": "e7ed03bfc197124f",
+        "name": "Mqtt publish client",
+        "topic": "",
+        "qos": "0",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "d967d8113b753eee",
+        "x": 870,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "15ad8627000a2242",
+        "type": "inject",
+        "z": "e7ed03bfc197124f",
+        "d": true,
+        "name": "LED OFF",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "bridge/LED01/write",
+        "payload": "0",
+        "payloadType": "num",
+        "x": 620,
+        "y": 100,
+        "wires": [
+            [
+                "d9f05b0ef06e3950"
+            ]
+        ]
+    },
+    {
+        "id": "e429b9aea428ef09",
+        "type": "inject",
+        "z": "e7ed03bfc197124f",
+        "d": true,
+        "name": "read config",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "bridge/config/read",
+        "payload": "",
+        "payloadType": "str",
+        "x": 620,
+        "y": 140,
+        "wires": [
+            [
+                "d9f05b0ef06e3950"
+            ]
+        ]
+    },
+    {
+        "id": "fa8cf9502859c8b6",
+        "type": "inject",
+        "z": "e7ed03bfc197124f",
+        "name": "get temperature data every 60 seconds",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "60",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "bridge/sensor01/temperature/read",
+        "payload": "",
+        "payloadType": "num",
+        "x": 480,
+        "y": 240,
+        "wires": [
+            [
+                "d9f05b0ef06e3950"
+            ]
+        ]
+    },
+    {
+        "id": "600725af812a6075",
+        "type": "mqtt out",
+        "z": "e7ed03bfc197124f",
+        "name": "Mqtt publish client",
+        "topic": "",
+        "qos": "0",
+        "retain": "false",
+        "respTopic": "",
+        "contentType": "",
+        "userProps": "",
+        "correl": "",
+        "expiry": "",
+        "broker": "d967d8113b753eee",
+        "x": 870,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "c7de8d893af5c1d0",
+        "type": "inject",
+        "z": "e7ed03bfc197124f",
+        "name": "get humidity data every 60 seconds",
+        "props": [
+            {
+                "p": "topic",
+                "vt": "str"
+            },
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "60",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "bridge/sensor01/humidity/read",
+        "payload": "",
+        "payloadType": "num",
+        "x": 480,
+        "y": 280,
+        "wires": [
+            [
+                "d9f05b0ef06e3950"
+            ]
+        ]
+    },
+    {
+        "id": "0b4d36f51d00ef63",
+        "type": "switch",
+        "z": "e7ed03bfc197124f",
+        "name": "get config",
+        "property": "topic",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "eq",
+                "v": "bridge/config",
+                "vt": "str"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 1,
+        "x": 600,
+        "y": 400,
+        "wires": [
+            [
+                "600725af812a6075"
+            ]
+        ]
+    },
+    {
+        "id": "7df8ae446efc5971",
+        "type": "comment",
+        "z": "e7ed03bfc197124f",
+        "name": "mqtt broker",
+        "info": "",
+        "x": 110,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "2f01ac28e1a8c316",
+        "type": "comment",
+        "z": "e7ed03bfc197124f",
+        "d": true,
+        "name": "For test",
+        "info": "",
+        "x": 610,
+        "y": 20,
+        "wires": []
+    },
+    {
+        "id": "094abbe5d711e1fa",
+        "type": "comment",
+        "z": "e7ed03bfc197124f",
+        "name": "Polling",
+        "info": "",
+        "x": 230,
+        "y": 240,
+        "wires": []
+    },
+    {
+        "id": "5d26c89c96eab05a",
+        "type": "comment",
+        "z": "e7ed03bfc197124f",
+        "name": "Deal with Get and Set command",
+        "info": "",
+        "x": 170,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "6932e01c1949e185",
+        "type": "modbus api server",
+        "port": "/dev/ttyUSB0",
+        "baudRate": "9600",
+        "dataBits": "8",
+        "parity": "none",
+        "stopBits": "1",
+        "timeout": "100",
+        "interval": "5",
+        "capacity": "256"
+    },
+    {
+        "id": "d967d8113b753eee",
+        "type": "mqtt-broker",
+        "name": "",
+        "broker": "127.0.0.1",
+        "port": "1883",
+        "clientid": "",
+        "autoConnect": true,
+        "usetls": false,
+        "protocolVersion": "4",
+        "keepalive": "60",
+        "cleansession": true,
+        "birthTopic": "",
+        "birthQos": "0",
+        "birthPayload": "",
+        "birthMsg": {},
+        "closeTopic": "",
+        "closeQos": "0",
+        "closePayload": "",
+        "closeMsg": {},
+        "willTopic": "",
+        "willQos": "0",
+        "willPayload": "",
+        "willMsg": {},
+        "sessionExpiry": ""
+    }
+]

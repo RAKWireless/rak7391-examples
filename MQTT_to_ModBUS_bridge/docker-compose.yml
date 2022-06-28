@@ -1,0 +1,23 @@
+version: '3.7'
+
+services:
+
+  nodered:
+    image: sheng2216/nodered-docker:1.1
+    container_name: NodeRed
+    user: node-red
+    restart: unless-stopped
+    devices:
+      - "/dev/i2c-1:/dev/i2c-1"
+      - "/dev/gpiochip0:/dev/gpiochip0"
+      - "/dev/gpiomem:/dev/gpiomem"
+      - "/dev/ttyUSB0:/dev/ttyUSB0"
+      - "/dev/ttyUSB1:/dev/ttyUSB1"
+    volumes:
+      - 'node-red-data:/data'
+    ports:
+      - "1880:1880"
+
+volumes:
+  node-red-data:
+
