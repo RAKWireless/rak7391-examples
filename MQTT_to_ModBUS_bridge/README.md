@@ -71,14 +71,13 @@ version: '3.7'
 services:
 
   nodered:
-    image: sheng2216/nodered-docker:1.1
+    image: nodered/node-red:latest
     container_name: NodeRed
     user: node-red
     restart: unless-stopped
+    group_add:
+      - dialout
     devices:
-      - "/dev/i2c-1:/dev/i2c-1"
-      - "/dev/gpiochip0:/dev/gpiochip0"
-      - "/dev/gpiomem:/dev/gpiomem"
       - "/dev/ttyUSB0:/dev/ttyUSB0"
       - "/dev/ttyUSB1:/dev/ttyUSB1"
     volumes:
@@ -184,7 +183,7 @@ sudo apt install mosquitto-clients
 
 Then we can test mqtt topics.
 
-For example, use the command bellow to control LED on. `172.23.0.2` should be replaced with the ip of nodered container.
+For example, use the command bellow to control LED on. `172.23.0.2` should be replaced with the ip of mqtt broker. In this example we deployed NodeRED in container, so the ip is container's ip.
 
 ```
 mosquitto_pub -h 172.23.0.2 -t bridge/LED01/write -m 1

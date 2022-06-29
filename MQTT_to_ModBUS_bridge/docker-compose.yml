@@ -3,14 +3,13 @@ version: '3.7'
 services:
 
   nodered:
-    image: sheng2216/nodered-docker:1.1
+    image: nodered/node-red:latest
     container_name: NodeRed
     user: node-red
     restart: unless-stopped
+    group_add:
+      - dialout
     devices:
-      - "/dev/i2c-1:/dev/i2c-1"
-      - "/dev/gpiochip0:/dev/gpiochip0"
-      - "/dev/gpiomem:/dev/gpiomem"
       - "/dev/ttyUSB0:/dev/ttyUSB0"
       - "/dev/ttyUSB1:/dev/ttyUSB1"
     volumes:
