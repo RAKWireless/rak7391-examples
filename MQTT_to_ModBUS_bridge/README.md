@@ -90,13 +90,14 @@ volumes:
   node-red-data:
 ```
 
-Run `docker-compose up` at the same directory with docker compose file to start NodeRED container.
+Run `docker-compose up` at the same directory with docker compose file to start NodeRED container. You can then browse to `http://{host-ip}:1880` to get the familiar Node-RED web interface.
 
 - **NodeRED node**
 
-The client side is a node-red flow with [@mrcamilletti/node-red-contrib-serial-modbus-api](https://github.com/mrcamilletti/node-red-contrib-serial-modbus-api) module. You must install it before import this flow, run the following command in the root directory of your node-red install,  `/usr/src/node-red` for container. 
+The client side is a node-red flow with [@mrcamilletti/node-red-contrib-serial-modbus-api](https://github.com/mrcamilletti/node-red-contrib-serial-modbus-api) module. You must install it before import this flow, run the following command in the root directory of your node-red install. If your Node-RED is deployed in the container, change the path to `/usr/src/node-red`. 
 
 ```
+cd ~/.node-red
 npm install @mrcamilletti/node-red-contrib-serial-modbus-api
 ```
 
@@ -108,13 +109,13 @@ We also need to install `node-red-contrib-aedes` as a mqtt broker.
 npm install node-red-contrib-aedes
 ```
 
-Please note that you must reboot the device after installing nodes.
+Depending on whether you deploy Node-RED locally or inside a container, please reboot your device/container after the nodes installation is completed.
 
 ## 3. Run example
 
 ### 3.1. Import flow and deploy
 
-After all the preparation, you can import the [flow](./MQTT_to_ModBUS_bridge.json) now, the new flow should look like this:
+After all the preparation is finished, you can import the [flow](./MQTT_to_ModBUS_bridge.json) now, the new flow should look like this:
 
 ![image-20220628111054645](assets/image-20220628111054645.png)
 
@@ -138,7 +139,9 @@ Polling section publish topics to get LED status, temperature data and humidity 
 
 This section subscribe mqtt topics and deal with get/set commands. For example,  set LED ON or OFF, get temperature or humidity data, get configuration.
 
-After import and deploy the flow, we can find polling result at right side.
+In the connection diagram provided above, one of the RAK5802 ModBUS module is mounted to WisBlock slot#1 on RAK7391, thus in the **modebus api request node**, we defined the Modbus server to **/dev/ttyUSB0:9600**. If the RAK5802 ModBUS module is mounted to WisBlock slot#2 on RAK7391, please change it to **/dev/ttyUSB1:9600**.
+
+After import and deploy the flow, we can find polling result in the debug window. The payloads are all raw data. For example, in the following figure, you will find number 51, 0, and 3005, which means the humidity is 51%, the LED is OFF, and the temperature is 30.05 ℃.
 
 ![image-20220628113505911](assets/image-20220628113505911.png)
 
