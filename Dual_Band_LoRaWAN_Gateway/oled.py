@@ -24,14 +24,10 @@ HEIGHT = 64
 BORDER = 5
 DELAY = 5
 MARGIN = 2
-AVAIL_WIDTH = 108
-AVAIL_HIGH = 48
-BUCKET_COUNT = 54
-MIN_BUCKET = 18
-MAX_BUCKET = 108
-START_WIDTH = 8
-START_HIGH = 12
-
+AVAIL_WIDTH = 114
+AVAIL_HIGH = 40
+MAX_BUCKET_COUNT = 28
+START_WIDTH = 5
 
 # -----------------------------------------------------------------------------
 # Pages
@@ -170,10 +166,32 @@ def docker(draw):
 
     return True
 
-
 def lorawan(draw):
+
     font = ImageFont.load_default()
     (font_width, font_height) = font.getsize("H")
+
+    # require bucket data from log2api
+    url = "http://127.0.0.1:8888/api/metrics"
+    try:
+        res = requests.get(url)
+    except:
+        return False
+    
+    bucket_data = json.loads(res.text)
+    bucket_count = min(bucket_data.get('bucket_count'), MAX_BUCKET_COUNT)
+    bucket_size = bucket_data.get('bucket_size')
+    buckets = bucket_data['buckets']
+    totals = bucket_data['totals']
+    rx_max = int(totals['rx_max'])
+    if rx_max == 0:
+        return False
+
+    # calculate the width of each bucket and real bucket count displayed.
+    bucket_width = int(AVAIL_WIDTH / bucket_count)
+
+    # calculate the pixel of every packet
+    unit = float(AVAIL_HIGH / rx_max)
 
     # draw y-axis, the packet count of each bucket.
     draw.line((3, 0, 3, 60), width=1, fill=128)
@@ -186,56 +204,21 @@ def lorawan(draw):
     draw.line((124, 57, 127, 60), width=1, fill=128)
     draw.text((121, 45), "t", font=font, fill=255)
 
-    # draw y-axis metric.
-    draw.line((3, 48, 5, 48), width=1, fill=128)
-    draw.line((3, 36, 5, 36), width=1, fill=128)
-    draw.line((3, 24, 5, 24), width=1, fill=128)
-    draw.line((3, 12, 5, 12), width=1, fill=128)
-
-    # calculate the width of each bucket and real bucket count displayed.
-
-    if AVAIL_WIDTH % BUCKET_COUNT:
-        bucket_width = AVAIL_WIDTH / BUCKET_COUNT + 1
-        bucket_count = AVAIL_WIDTH / bucket_width
-    else:
-        bucket_width = AVAIL_WIDTH / BUCKET_COUNT
-        bucket_count = BUCKET_COUNT
-
-    # require bucket data from log2api
-    url = "http://127.0.0.1:8888/api/metrics"
-    try:
-        res = requests.get(url)
-    except:
-        draw.rectangle((0, 0, oled.width - 1, oled.height - 1),
-                       outline=255, fill=0)
-        return False
-
-    bucket_data = json.loads(res.text)
-    buckets = bucket_data['buckets']
-    totals = bucket_data['totals']
-
-    # Don't display if no packet
-    rx_max = totals['rx_max']
-    if rx_max == 0:
-        return True
-
-    # calculate the pixel of every packet
-    unit = float(AVAIL_HIGH / rx_max)
-
-    # draw every bucket
+    # draw every bucket 
     for i in range(bucket_count):
-        tmp = buckets.get(str(BUCKET_COUNT - bucket_count + i), {'rx': 0, 'tx': 0})
+        tmp = buckets.get(str(i), {'rx': 0, 'tx': 0})
         rx = tmp['rx']
-
-        draw.rectangle((START_WIDTH + i * bucket_width, 60, START_WIDTH + (i + 1) * bucket_width - 1,
-
-                        60 - int(rx * unit)), outline=1, fill=1)
+        draw.rectangle(
+            (START_WIDTH + i * bucket_width, 60, START_WIDTH + (i + 1) * bucket_width - 1, 60 - int(rx * unit) - 1), 
+            outline=1, 
+            fill=1
+        )
+    
     # draw top line
-    top = "SIZE:%d MAX:%d" % (bucket_count, rx_max)
+    top = "LAST %dm, MAX:%d"%(bucket_count * bucket_size / 60, rx_max)
     draw.text((10, 0), top, font=font, fill=255)
-
+    
     return True
-
 
 def power_message(text1, text2):
     # Clear display.
