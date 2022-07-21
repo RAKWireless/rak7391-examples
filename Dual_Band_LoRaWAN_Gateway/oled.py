@@ -274,13 +274,15 @@ class Graceful_shutdown:
         ]
         for signum in catchSignals:
             signal.signal(signum, self.handler)
+        signal.pause()
 
     def handler(self, signum, frame):
         self.lastSignal = signum
         self.receivedSignal = True
         if signum in [2, 3, 15]:
             self.receivedTermSignal = True
-
+            system_shutdown()
+            sys.exit()
 
 def system_shutdown():
     timer.cancel()
@@ -291,9 +293,11 @@ def system_shutdown():
 
 
 def power_supply_issues(channel):
+    global timer
     timer.cancel()
     power_message("POWER SUPPLY", "ISSUES !")
     time.sleep(60)
+    timer = RepeatTimer(DELAY, show_page)
     timer.start()
 
 
@@ -358,11 +362,3 @@ GPIO.setup(16, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 GPIO.add_event_detect(16, GPIO.FALLING, callback=power_supply_issues)
 # signal handler for graceful shutdown
 signal_handler = Graceful_shutdown()
-
-while True:
-    # handles system shutdown/reboot
-    if signal_handler.receivedSignal:
-        if signal_handler.receivedTermSignal:
-            system_shutdown()
-            sys.exit()
-
