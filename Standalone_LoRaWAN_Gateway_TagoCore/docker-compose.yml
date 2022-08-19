@@ -1,0 +1,140 @@
+version: '2'
+
+services:
+
+  udp-packet-forwarder:
+    image: rakwireless/udp-packet-forwarder:latest
+    container_name: udp-packet-forwarder
+    restart: unless-stopped
+    networks:
+      - bridge
+    devices:
+      - /dev/spidev0.0
+    volumes:
+      - /sys:/sys
+    environment:
+      MODEL: "RAK2287"
+      INTERFACE: "SPI"
+      RADIO_DEV: "/dev/spidev0.0"
+      GATEWAY_EUI: "0011223344556677"
+      SERVER_HOST: stack
+      SERVER_PORT: 1700
+
+  postgres:
+    image: postgres:14.3-alpine3.15
+    container_name: postgres
+    restart: unless-stopped
+    environment:
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_USER=root
+      - POSTGRES_DB=ttn_lorawan
+    networks:
+      - bridge
+    volumes:
+      - 'postgres:/var/lib/postgresql/data'
+    ports:
+      - "5432:5432"
+
+  redis:
+    image: redis:7.0.0-alpine3.15
+    container_name: redis
+    command: redis-server --appendonly yes
+    restart: unless-stopped
+    networks:
+      - bridge
+    volumes:
+      - 'redis:/data'
+    ports:
+      - "6379:6379"
+
+  stack:
+    image: xoseperez/the-things-stack:latest
+    container_name: stack
+    restart: unless-stopped
+    depends_on:
+      - redis
+      - postgres
+    networks:
+      - bridge
+    volumes:
+      - 'stack-blob:/srv/ttn-lorawan/public/blob'
+      - 'stack-data:/srv/data'
+    environment:
+      TTS_DOMAIN: 10.42.0.242
+      CLI_AUTO_LOGIN: "true"
+      TTN_LW_BLOB_LOCAL_DIRECTORY: /srv/ttn-lorawan/public/blob
+      TTN_LW_REDIS_ADDRESS: redis:6379
+      TTN_LW_IS_DATABASE_URI: postgres://root:root@postgres:5432/ttn_lorawan?sslmode=disable
+      WAIT_HOSTS: redis:6379, postgres:5432
+      WAIT_HOSTS_TIMEOUT: 300
+      WAIT_SLEEP_INTERVAL: 30
+      WAIT_HOST_CONNECT_TIMEOUT: 30
+
+    ports:
+      - "80:1885"
+      - "443:8885"
+      - "1881:1881"
+      - "1882:1882"
+      - "1883:1883"
+      - "1884:1884"
+      - "1885:1885"
+      - "1887:1887"
+      - "8881:8881"
+      - "8882:8882"
+      - "8883:8883"
+      - "8884:8884"
+      - "8885:8885"
+      - "8887:8887"
+      - "1700:1700/udp"
+
+  mariadb:
+    image: mariadb
+    container_name: mariadb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: unless-stopped
+    environment:
+      MARIADB_ROOT_PASSWORD: root
+      MARIADB_DATABASE: tcore
+      MARIADB_USER: tcore
+      MARIADB_PASSWORD: tcore
+    volumes:
+      - mariadb:/var/lib/mysql
+      - /etc/localtime:/etc/localtime:ro
+    networks: 
+      - tagocore
+
+  tagocore:
+    #image: tagoio/tagocore
+    build:
+      context: tagocore
+      dockerfile: Dockerfile-alpine-node
+      args:
+        TAGOCORE_VERSION: 0.6.0
+        TARGETPLATFORM: linux/arm64
+        BUILDPLATFORM: linux/arm64
+    container_name: tagocore
+    restart: unless-stopped
+    environment:
+      CLUSTER_TOKEN: 4d8392f4-cda0-4854-aba9-47c101affa7a
+    networks:
+      - bridge
+      - tagocore
+    ports:
+      - "9888:8888"
+      - "9999:8999"
+      - "9883:1883"
+    volumes:
+      - tagocore:/root/.tagocore
+      - ./volume/tagocore:/root/shared
+
+volumes:
+  redis:
+  postgres:
+  stack-blob:
+  stack-data:
+  mariadb:
+  tagocore:
+
+networks:
+  bridge:
+  tagocore:
