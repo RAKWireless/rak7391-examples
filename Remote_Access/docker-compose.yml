@@ -3,8 +3,8 @@ version: '2.4'
 services:
   
   tailscaled:
-    #build: .
-    image: sheng2216/tailscale
+    build:
+      context: tailscale
     container_name: tailscaled
     restart: unless-stopped
     network_mode: host
@@ -16,7 +16,4 @@ services:
       - net_admin
       - sys_module
     environment:
-      - TS_AUTH_KEY=tskey-kxeT6N4CNTRL-54YuAY21vsHBXBci1rnjE
-    command:
-      - /bin/sh
-      - /launch.sh
+      - TS_AUTH_KEY=tskey-your-key-here

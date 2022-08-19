@@ -12,8 +12,7 @@ This guide explains how to automate the login of the Tailscale with a docker-com
 
 ### 1.2. containerized Tailscale 
 
-The Tailscale image used in this guides is a modified image with a `launch.sh`  script that does the auto login job for you. The image is based on the latest official image, please check Tailscale's official [Dockerhub documentation](https://hub.docker.com/r/tailscale/tailscale) for more information. When using the official image, users need run the Tailscaled agent first, and then log in manually.
-
+The Tailscale image used in this guides is a modified image with a `launch.sh` script that does the auto login job for you. The image is based on the latest official image, please check Tailscale's official [Dockerhub documentation](https://hub.docker.com/r/tailscale/tailscale) for more information. When using the official image, users need run the Tailscaled agent first, and then log in manually.
 
 
 ## 2. Preparation
@@ -22,11 +21,11 @@ The Tailscale image used in this guides is a modified image with a `launch.sh`  
 
 In the docker-compose file, we defined an environment variable called `TS_AUTH_KEY`, this is the pre-authentication keys (“auth keys” for short), it allows you to register new nodes without needing to sign in via a web browser. 
 
-While the authkey give you some conveniences when you register the node, you still need to create an account on Tailscale first, and then generate an anth key first, and then paste this key to the `docker-compose.yml` file.
+While the authkey give you some conveniences when you register the node, you still need to create an account on Tailscale first, and then generate an auth key and finally paste this key to the `docker-compose.yml` file.
 
 Here are the steps；
 
-1. Browse to https://tailscale.com/, click the blue icon  `Use Tailscale` to [create an account or login](https://login.tailscale.com/start ). 
+1. Browse to https://tailscale.com/, click the blue icon `Use Tailscale` to [create an account or login](https://login.tailscale.com/start ). 
 
 2. After you create your account, you can learn how to install it. But since we are using the containerized Tailscale, we will do it in the container way, so just skip it.
 
@@ -52,12 +51,12 @@ Here are the steps；
 
 ### 2.2 Image
 
-You can build the image by yourself, we provided a **Dockerfile** for you to play with; or just use the image provided by us. It's totally up to you. 
+You can build the image by yourself, we provided a **Dockerfile** for you to play with.
 
 If you decided to build a new image, you can run the following command to build a image called `tailscale/mytailscale:latest`
 
 ```
-docker build -t tailscale/mytailscale .
+docker build -t tailscale/mytailscale tailscale
 ```
 
 or forget about the **Dockerfile**, let `docker-compose.yml` to do the job for you:
@@ -67,8 +66,9 @@ version: '2.4'
 
 services:
   tailscaled:
-    build: .
-    #image: sheng2216/tailscale  #you can change the image name to your own image name
+    build:
+      context: tailscale
+    #image: tailscale/mytailscale # use the name of the image you created
     container_name: tailscaled
     restart: unless-stopped
     network_mode: host
@@ -81,9 +81,6 @@ services:
       - sys_module
     environment:
       - TS_AUTH_KEY=<change this to your own authkey>
-    command:
-      - /bin/sh
-      - /launch.sh
 ```
 
 ### 2.3 docker-compose up
@@ -104,6 +101,7 @@ and also connected in the console (Web interface):
 
 Now, the IP assigned to this machine is 100.98.64.7, you can add register another node in the same way, and try to see if you can control each machine from the other machine using SSH.
 
+
 ## 3. Delete node
 
 If you don't need this node anymore, you can just stop this container, and also release corresponding resources ( `docker-compose down` ). If you wan to change the authkey or you want to completely delete it, you need run the following command as `root` (not `sudo`) to destroying any state or local information：
@@ -113,7 +111,6 @@ su root
 #enter you password
 rm /var/lib/tailscale/tailscaled.state
 ```
-
 
 
 ## 4. License

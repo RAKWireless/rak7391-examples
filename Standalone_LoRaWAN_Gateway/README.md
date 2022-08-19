@@ -2,43 +2,45 @@
 
 [TOC]
 
+
 ## 1. Introduction
 
 This guide explains how the Standalone LoraWAN Gateway works. We will use MQTT to subscribe uplink messages from TTN stack. Once the messages from the registered devices arrive to the LNS, they are being published as MQTT messages so we can process them from Node-RED. The environmental data is stored in the influxdb databases, and then visualized through Grafana.
+
 
 ### 1.1. Docker compose
 
 We have 7 services defined in the [Docker-compose](./docker-compose.yml) file: 
 
 - `udp-packet-forwarder` interacts with the LoRa chip to receive and transfer LoRa packets
-- `stack` is a TTN stack service which depends on `redis` and `postgres` service, `stack`enables connectivity, management, and monitoring of devices, gateways and end-user applications
-- `Redis` is the main data store for the Network Server, Application Server and Join Server, and it is also used by Identity Server and event system.
-- `Postgres` is another databased used by `stack` 
+- `stack` is a TTN stack service which depends on `redis` and `postgres` service. This service enables connectivity, management, and monitoring of devices, gateways and end-user applications
+- `redis` is the main data store for the Network Server, Application Server and Join Server, and it is also used by Identity Server and event system.
+- `postgres` is another databased used by `stack` 
 - `node-red` service contains a default flow which subscribe uplink data from TTN stack by MQTT protocol and stores the data into a `influxdb` database, whose name is **sensors**; 
 - `influxdb` service provide a database which `node-red` will use
 - `grafana` service uses the influxdb as a data resource, and visualize the data.
 
-### 1.2. Url and account
 
-Modify the "SERVER_HOST" environment variables defined in the service `udp-packet-forwarder` , and also the `TTS_DOMAIN` environment variable of the `stack` service in docker compose file to your device IP or domain.
+### 1.2. Run services
 
-![image-20220617153243601](assets/change udp server_host.png)
+The included `run.sh` script takes care of tweaking the `dcoker-compose.yml` file to change the IP of the host and bring up all the service. 
 
-![image-20220617153243601](assets/image-20220617153243601.png)
+```
+$ ./run.sh
 
-Then do `docker-compose up`,  we can browse to the Tings Stack's web interface, in this case, just enter 10.2.21.244 in your browser. The default User ID and Password is `admin` and `changeme`.
+```
+
+After running it wait a few seconds for the Stack web UI to become alive and click on the provided link to access the web UI. The default User ID and Password is `admin` and `changeme`.
 
 ![image-20220617153554724](assets/image-20220617153554724.png)
 
-after you login, you need to create your a gateway first:
+After you login, you need to create your a gateway first using the GATEWAY_EUI provided by the `run.sh` script, see the `2.1 Create Gateway` section below.
 
-
-
-navigate to the web-interface of `node-red` , in this case, in the same LAN, go to [10.2.21.244:1880](10.2.21.244:1880), and you should be able to see the default flow. It's not ready to work for now, we will create an application in TTS first, and then come back and fill out some important information to make it work.
+Navigate to the web-interface of `Node-RED` (use the link provided by the `run.sh` script) and you should be able to see the default flow. It's not ready to work for now, we will create an application in TTS first, and then come back and fill out some important information to make it work.
 
 ![image-20220617153722788](assets/image-20220617153722788.png)
 
-Open `grafana`, in this case [10.2.21.244:3000](10.2.21.244:3000) , The default Username and Password is `admin` and `changeme`. When loged in, there will be a default data resource. 
+Open `grafana` (use the link provided by the `run.sh` script). The default Username and Password is `admin` and `changeme`. When loged in, there will be a default data resource. 
 
 ![image-20220617153926773](assets/image-20220617153926773.png)
 
@@ -49,10 +51,10 @@ As a side note, we can also access `influxdb` container with the following comma
 ![image-20220617155242042](assets/image-20220617155242042.png) 
 
 
-
 ## 2. Preparation
 
-### 2.1 Create Gateway
+
+### 2.1 Create gateway
 
 You need to add your gateway to TTS first. Go to the **Gateway** configuration page, enter the general ID, Gateway EUI, Gateway server address, and also the frequency plan. If you use the default docker-compose file, your gateway EUI can be acquired by running the following command in your host:
 
@@ -67,9 +69,6 @@ The gateway server address is the one you defined in the docker-compose file. Ma
 after the gateway is created in TTS, you should be able to see the gateway is online in the gateway detail page:
 
 ![gateway is online](assets/gateway-online.png)
-
-
-
 
 
 ### 2.2 Create application
@@ -88,9 +87,10 @@ Copy the API key, we will use it on NodeRED flow. Please note that you must copy
 
 ![image-20220617160317654](assets/image-20220617160317654.png)
 
+
 ### 2.3 Prepare end device
 
-Now, the TTS side's configuration is about to finish, we need to add end-devices to the application so that we can start to receive uplink data sent by the end-devices on the gateway. But even before that, we need prepare the end device. The end device we used is a WisBlock kit with the RAK1901 sensor that reports temperature and humidity. You can find more details in RAKwireless's [official documentation](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK1901/Quickstart/#software-configuration-and-example). The Arduino code [rak1901.ino](./rak1901.ino) is provided, you can copy paste the code, and then upload to the board. Make sure to change the device EUI, the App EUI, and the App key.
+Now, the TTS side's configuration is about to finish, we need to add end-devices to the application so that we can start to receive uplink data sent by the end-devices on the gateway. But even before that, we need prepare the end device. The end device we used is a WisBlock kit with the RAK1901 sensor that reports temperature and humidity. You can find more details in RAKwireless's [official documentation](https://docs.rakwireless.com/Product-Categories/WisBlock/RAK1901/Quickstart/#software-configuration-and-example). The Arduino code [rak1901.ino](./rak1901/rak1901.ino) is provided, you can copy paste the code, and then upload to the board. Make sure to change the device EUI, the App EUI, and the App key.
 
 ![Arduino code](assets/arduino-code.png)
 
@@ -114,7 +114,9 @@ now you should be able to see the converted live-data:
 
 ![converted live data](assets/live-data.png)
 
+
 ## 3. Modify NodeRED flow
+
 
 ### 3.1 Modify mqtt-broker node
 
@@ -122,17 +124,20 @@ Open `mqtt-broker` node and paste the API keys we saved before to the **Password
 
 ![image-20220617160756156](assets/image-20220617160756156.png)
 
-### 3.2 Modify influxdb node and Deploy
+
+### 3.2 Modify InfluxDB node and Deploy
 
 Open `influxdb` node and modify Username and Password.  If username is `admin` and Pasword is `changeme`, you  needn't to change it. 
 
 ![image-20220617161244341](assets/image-20220617161244341.png)
+
 
 ### 3.3 Modify MQTT subscribe topic
 
 The format of uplink data of ttn stack is `v3/{application_id}/devices/{device_id}/up`.  Here we user `+` to subscribe all devices under application `app01`. If you only want to subscribe one device, you can change `+` to the id of specific device.
 
 ![image-20220617162041244](assets/image-20220617162041244.png)
+
 
 ### 3.4 Deploy
 
@@ -141,6 +146,7 @@ If all has been done correctly, after you click Deploy button, you should be abl
 ![image-20220617161646234](assets/image-20220617161646234.png)
 
 and your 
+
 
 ## 4. Data visualization in Grafana
 
@@ -153,6 +159,7 @@ Open Grafana's web interface and then create a new dasbboard:
 the "measurement" will be something like "eui-xxxxxxxx", and you can **Select** either/both "temperature_1" or "relatively_humidity_2" to display. If you want to display temperature and relatively_humidity on the same panel, you can create another query. The final result should be somthing like the following graph:
 
 ![image-20220622200104739](assets/grafana-panel.png)
+
 
 ## 5. License
 
