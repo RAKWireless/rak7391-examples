@@ -4,7 +4,7 @@
 
 ## 1.Introduction
 
-This guide explains use a NodeRED flow for a Modbus RTU (serial) to MQTT bidirectional bridge.
+This guide shows a NodeRED flow for a Modbus RTU (serial) to MQTT bidirectional bridge.
 
 ## 2. Preparation
 
@@ -35,8 +35,15 @@ In this example we will first create a Modbus sensor (a.k.a. master or sender) u
 ![WisBlock Sensor RAK1901](assets/rak1901.png)
 
 
-
 #### 2.1.3. Connection diagram
+
+We are going to connect the RAK5812 modules on both sides (WisBlock and RAK7391) this way: A to A, B to B and share the ground.
+
+| WisBlock | RAK7391 |
+|:-:|:-:|
+| A | A |
+| B | B |
+| GND | GND |
 
 ![image-20220628110644536](assets/image-20220628110644536.png)
 
@@ -60,8 +67,6 @@ At the top of the example sketch you have links to install the required librarie
 Then compile and upload the [sketch](rak5802_modbus_device/rak5802_modbus_device.ino).
 
 #### 2.3.2. Master device
-
-- **NodeRED container**
 
 Create a docker compose file with the following content.
 
@@ -89,50 +94,48 @@ volumes:
   node-red-data:
 ```
 
-Run `docker-compose up` at the same directory with docker compose file to start NodeRED container. You can then browse to `http://{host-ip}:1880` to get the familiar Node-RED web interface.
+Run `docker compose up` at the same directory with docker compose file to start NodeRED container. You can then browse to `http://{host-ip}:1880` to get the familiar Node-RED web interface.
 
-- **NodeRED node**
+#### 2.3.3. Flow dependencies
 
-The client side is a node-red flow with [@mrcamilletti/node-red-contrib-serial-modbus-api](https://github.com/mrcamilletti/node-red-contrib-serial-modbus-api) module. You must install it before import this flow, run the following command in the root directory of your node-red install. If your Node-RED is deployed in the container, change the path to `/usr/src/node-red`. 
+The NodeRED flow we are going to use has two dependecies:
 
-```
-cd ~/.node-red
-npm install @mrcamilletti/node-red-contrib-serial-modbus-api
-```
+* [@mrcamilletti/node-red-contrib-serial-modbus-api](https://github.com/mrcamilletti/node-red-contrib-serial-modbus-api)
+* [node-red-contrib-aedes](https://github.com/martin-doyle/node-red-contrib-aedes)
 
-![image-20220628104643675](assets/image-20220628104643675.png)
-
-We also need to install `node-red-contrib-aedes` as a mqtt broker.
+You can install them from the NodeRED web UI on the `Manage Palette` option of the main menu or using the command line:
 
 ```
-npm install node-red-contrib-aedes
+docker exec -it NodeRed @mrcamilletti/node-red-contrib-serial-modbus-api
+docker exec -it NodeRed node-red-contrib-aedes
+docker restart NodeRed
 ```
 
-Depending on whether you deploy Node-RED locally or inside a container, please reboot your device/container after the nodes installation is completed.
+Remember to reboot your container after the nodes installation is completed.
 
 ## 3. Run example
 
 ### 3.1. Import flow and deploy
 
-After all the preparation is finished, you can import the [flow](./MQTT_to_ModBUS_bridge.json) now, the new flow should look like this:
+After all the preparation is finished, you can import the [flow](./flow/MQTT_to_ModBUS_bridge.json) now, the new flow should look like this:
 
 ![image-20220628111054645](assets/image-20220628111054645.png)
 
 There are three part in this flow:
 
-- **MQTT broker**
+#### 3.1.1 MQTT broker
 
 Aedes MQTT broker is a internal mqtt broker in this flow.
 
 ![image-20220628112709077](assets/image-20220628112709077.png)
 
-- **Polling**
+#### 3.1.2 Polling
 
 ![image-20220628112743037](assets/image-20220628112743037.png)
 
 Polling section publish topics to get LED status, temperature data and humidity data.
 
-- **Subscribe topic and deal with get/set commands**
+#### 3.1.3 Subscribe topic and deal with get/set commands
 
 ![image-20220628113034697](assets/image-20220628113034697.png)
 

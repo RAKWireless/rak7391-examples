@@ -12,7 +12,7 @@ services:
 
     environment:
 
-      MODEL: "RAK5146"
+      MODEL: "RAK2287"
       INTERFACE: "SPI"
       GW_RESET_GPIO: 17
       GW_POWER_EN_GPIO: 0

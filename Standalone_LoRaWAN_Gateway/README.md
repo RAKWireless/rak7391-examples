@@ -10,7 +10,7 @@ This guide explains how the Standalone LoraWAN Gateway works. We will use MQTT t
 
 ### 1.1. Docker compose
 
-We have 7 services defined in the [Docker-compose](./docker-compose.yml) file: 
+We have 7 services defined in the [docker compose](./docker-compose.yml) file: 
 
 - `udp-packet-forwarder` interacts with the LoRa chip to receive and transfer LoRa packets
 - `stack` is a TTN stack service which depends on `redis` and `postgres` service. This service enables connectivity, management, and monitoring of devices, gateways and end-user applications
@@ -56,13 +56,13 @@ As a side note, we can also access `influxdb` container with the following comma
 
 ### 2.1 Create gateway
 
-You need to add your gateway to TTS first. Go to the **Gateway** configuration page, enter the general ID, Gateway EUI, Gateway server address, and also the frequency plan. If you use the default docker-compose file, your gateway EUI can be acquired by running the following command in your host:
+You need to add your gateway to TTS first. Go to the **Gateway** configuration page, enter the general ID, Gateway EUI, Gateway server address, and also the frequency plan. If you use the default docker compose file, your gateway EUI can be acquired by running the following command in your host:
 
 ```
 docker exec -it udp-packet-forwarder ./get_eui.sh
 ```
 
-The gateway server address is the one you defined in the docker-compose file. Make sure you choose the right frequency plan.
+The gateway server address is the one you defined in the docker compose file. Make sure you choose the right frequency plan.
 
 ![image-20220623091446030](assets/image-20220623091446030.png)
 

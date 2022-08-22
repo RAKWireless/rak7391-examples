@@ -84,7 +84,7 @@ services:
         - "1700:1700/udp"
 ```
 
-Modify the `TTS_DOMAIN` environment variable to match your setup. Then run `docker-compose up` to start the container.
+Modify the `TTS_DOMAIN` environment variable to match your setup. Then run `docker compose up` to start the container.
 
 ![image-20220609110556845](assets/image-20220609110556845.png)
 

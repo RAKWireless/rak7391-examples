@@ -9,9 +9,9 @@ services:
     restart: unless-stopped
     group_add:
       - dialout
-    devices:
-      - "/dev/ttyUSB0:/dev/ttyUSB0"
-      - "/dev/ttyUSB1:/dev/ttyUSB1"
+    #devices:
+    #  - "/dev/ttyUSB0:/dev/ttyUSB0"
+    #  - "/dev/ttyUSB1:/dev/ttyUSB1"
     volumes:
       - 'node-red-data:/data'
     ports:

@@ -8,7 +8,7 @@ This guide explains how to create a Standalone LoraWAN Gateway with [TagoCore](h
 
 ### 2. Services
 
-We have 5 services defined in the [Docker-compose](./docker-compose.yml) file: 
+We have 5 services defined in the [docker compose](./docker-compose.yml) file: 
 
 - `udp-packet-forwarder` interacts with the LoRa chip to receive and transfer LoRa packets
 - `stack` is a TTN stack service which depends on `redis` and `postgres` service. This service enables connectivity, management, and monitoring of devices, gateways and end-user applications
