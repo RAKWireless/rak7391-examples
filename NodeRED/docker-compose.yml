@@ -1,0 +1,27 @@
+version: '3.7'
+
+services:
+
+  nodered:
+    image: sheng2216/nodered-docker:rak
+#    build:
+#      context: ./
+#      dockerfile: Dockerfile
+    container_name: NodeRed
+    user: node-red
+    group_add:
+      - "997"
+      - "998"
+    restart: unless-stopped
+    devices:
+      - "/dev/gpiochip0:/dev/gpiochip0"
+      - "/dev/i2c-1:/dev/i2c-1"
+      - "/dev/ttyUSB0:/dev/ttyUSB0"
+      - "/dev/ttyUSB1:/dev/ttyUSB1"
+    volumes:
+      - 'node-red-data:/data'
+    ports:
+      - "1880:1880"
+
+volumes:
+  node-red-data:
