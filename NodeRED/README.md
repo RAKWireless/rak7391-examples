@@ -144,7 +144,7 @@ Now you should be able to access Node-RED's web interface by browsing to `http:/
 
 And you should see a list of Node-RED nodes developed by RAKWireless on the left side:
 
-![](C:\Users\Sheng\AppData\Roaming\marktext\images\2022-08-24-12-24-09-image.png)
+![wisblock nodes](https://git.rak-internal.net/product-rd/gateway/wis-developer/rak7391/rak7391-use-cases/-/raw/dev/NodeRED/assets/wisblock-nodes.png)
 
 These nodes are designed to support Wisblock modules, but they should also be compatible with the chips integreted into the Wisblock modules, please check the list below:
 
