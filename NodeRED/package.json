@@ -1,0 +1,54 @@
+{
+    "name": "node-red-docker",
+    "version": "3.0.2",
+    "description": "Low-code programming for event-driven applications",
+    "homepage": "http://nodered.org",
+    "license": "Apache-2.0",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/node-red/node-red-docker.git"
+    },
+    "main": "node_modules/node-red/red/red.js",
+    "scripts": {
+        "start": "node $NODE_OPTIONS node_modules/node-red/red.js $FLOWS",
+        "debug": "node --inspect=0.0.0.0:9229 $NODE_OPTIONS node_modules/node-red/red.js $FLOWS",
+        "debug_brk": "node --inspect=0.0.0.0:9229 --inspect-brk $NODE_OPTIONS node_modules/node-red/red.js $FLOWS"
+    },
+    "contributors": [
+        {
+            "name": "Dave Conway-Jones"
+        },
+        {
+            "name": "Nick O'Leary"
+        },
+        {
+            "name": "James Thomas"
+        },
+        {
+            "name": "Raymond Mouthaan"
+        }
+    ],
+    "dependencies": {
+        "node-red": "3.0.2",
+        "@mschaeffler/node-red-lora": "^1.2.4",
+        "node-red-contrib-ads1x15_i2c": "0.0.14",
+        "node-red-contrib-aedes": "^0.7.0",
+        "node-red-contrib-i2c": "^0.9.0",
+        "node-red-contrib-influxdb": "^0.6.1",
+        "node-red-contrib-schedex": "^1.10.6",
+        "node-red-dashboard": "^3.1.6",
+        "node-red-node-pi-gpiod": "^0.4.0",
+        "@rakwireless/shtc3": "^1.0.4",
+        "@rakwireless/adc121c021": "^1.0.0",
+        "@rakwireless/linbus": "^1.0.0",
+        "@rakwireless/ltr-390uv": "^1.0.0",
+        "@rakwireless/opt3001": "^1.0.0",
+        "@rakwireless/pi4ioe5v": "^1.0.0",
+        "@rakwireless/ads7830": "^1.0.0",
+        "@rakwireless/mcp-pcf-aio": "^1.0.0",
+        "@rakwireless/pn532": "^1.0.0"
+    },
+    "engines": {
+        "node": ">=12"
+    }
+}
