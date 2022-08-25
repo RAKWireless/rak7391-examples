@@ -4,7 +4,7 @@
 # Configuration
 # ----------------------------
 
-INTERFACE=${INTERFACE:-"eth0"}
+INTERFACE=${INTERFACE:-$(ip route | awk '/default/ {print $5}')}
 GATEWAY_EUI=${GATEWAY_EUI:-$(ip link show $INTERFACE | awk '/ether/ {print $2}' | awk -F\: '{print $1$2$3"fffe"$4$5$6}' | tr '[a-z]' '[A-Z]')}
 IP=${IP:-$(ip address show $INTERFACE | awk '/inet / {print $2}' | sed 's/\/.*//' | tail -1)}
 GATEWAY_ID=${GATEWAY_ID:-"gw01"}
