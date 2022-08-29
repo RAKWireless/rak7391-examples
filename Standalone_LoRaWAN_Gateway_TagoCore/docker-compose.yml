@@ -114,8 +114,8 @@ services:
         BUILDPLATFORM: linux/arm64
     container_name: tagocore
     restart: unless-stopped
-    environment:
-      CLUSTER_TOKEN: 4d8392f4-cda0-4854-aba9-47c101affa7a
+    #environment:
+    #  CLUSTER_TOKEN: <your-cluster-token-here> # consider setting this in a secret
     networks:
       - bridge
       - tagocore
