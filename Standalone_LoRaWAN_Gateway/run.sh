@@ -21,6 +21,7 @@ COLOR_END="\e[0m"
 echo -e "${COLOR_HEADER}[1] Configuring docker-compose.yml file${COLOR_END}"
 sed "s/GATEWAY_EUI: \".*\"/GATEWAY_EUI: \"$GATEWAY_EUI\"/g" -i docker-compose.yml
 sed "s/TTS_DOMAIN: .*/TTS_DOMAIN: $IP/g" -i docker-compose.yml
+sed "s/SERVER_HOST: .*/SERVER_HOST: $IP/g" -i docker-compose.yml
 
 echo -e "${COLOR_HEADER}[2] Pulling remote images (it may take a while the first time)${COLOR_END}"
 docker compose pull -q
