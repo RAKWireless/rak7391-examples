@@ -6,17 +6,19 @@ services:
     image: rakwireless/udp-packet-forwarder:latest
     container_name: udp-packet-forwarder
     restart: unless-stopped
+    privileged: true
     networks:
       - bridge
-    devices:
-      - /dev/spidev0.0
-    volumes:
-      - /sys:/sys
     environment:
-      MODEL: "RAK2247"
-      INTERFACE: "SPI"
-      RADIO_DEV: "/dev/spidev0.0"
-      GATEWAY_EUI: "0011223344556677"
+      
+      # The service will auto-discover the concentrator (not for SX1301 concentrators),
+      # but you can also specify it manually:
+      #MODEL: "RAK5146"
+      #INTERFACE: "SPI"
+      #DEVICE: "/dev/spidev0.0"
+      #GATEWAY_EUI_SOURCE: "chip"
+      #GATEWAY_EUI: "0102030405060708"
+      
       SERVER_HOST: stack
       SERVER_PORT: 1700
 
@@ -136,6 +138,7 @@ services:
       - stack
     volumes:
       - ./volume/node-red/data:/data
+
 volumes:
   influxdb-storage:
   grafana-storage:
